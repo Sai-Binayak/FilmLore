@@ -1,0 +1,26 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+model favfilms {
+  id           Int           @id @default(autoincrement())
+  title        String        @unique(map: "title") @db.VarChar(255)
+  type         favfilms_type
+  director     String?       @db.VarChar(255)
+  budget       Decimal?      @db.Decimal(15, 2)
+  genre        String?       @db.VarChar(12)
+  location     String?       @db.VarChar(255)
+  duration     String?       @db.VarChar(50)
+  year_or_time String?       @db.VarChar(10)
+  rating       Decimal?      @db.Decimal(3, 1)
+}
+
+enum favfilms_type {
+  Movie
+  TV_Show @map("TV Show")
+}
