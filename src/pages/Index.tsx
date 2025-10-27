@@ -26,6 +26,8 @@ const Index = () => {
   const [isDeleting, setIsDeleting] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
   const [filterType, setFilterType] = useState("");
+const [isModalOpen, setIsModalOpen] = useState(false);
+
 
   const loadEntries = async (pageNum: number) => {
     try {

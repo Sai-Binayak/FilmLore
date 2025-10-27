@@ -13,17 +13,13 @@ interface EntryTableProps {
   isLoading: boolean;
 }
 
-export const EntryTable = ({
-  entries,
-  onEdit,
-  onDelete,
-  onLoadMore,
-  hasMore,
-  isLoading,
-}: EntryTableProps) => {
+export const EntryTable = ({ entries, onEdit, onDelete, onLoadMore, hasMore, isLoading }: EntryTableProps) => {
   const observerTarget = useRef<HTMLDivElement>(null);
   const [sortField, setSortField] = useState<keyof Entry>("title");
   const [sortDirection, setSortDirection] = useState<"asc" | "desc">("asc");
+  const [selectedEntry, setSelectedEntry] = useState<Entry | null>(null);
+  const [isModalOpen, setIsModalOpen] = useState(false);
+
 
   useEffect(() => {
     const observer = new IntersectionObserver(
@@ -120,7 +116,15 @@ export const EntryTable = ({
                 key={entry.id}
                 className="border-b border-border hover:bg-card/30 transition-colors"
               >
-                <td className="px-4 py-3 font-medium">{entry.title}</td>
+<td
+  className="px-4 py-3 font-medium text-primary hover:underline cursor-pointer"
+  onClick={() => {
+    setSelectedEntry(entry);
+    setIsModalOpen(true);
+  }}
+>
+  {entry.title}
+</td>
                 <td className="px-4 py-3">
                   <span
                     className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
@@ -207,6 +211,46 @@ export const EntryTable = ({
             )}
           </tbody>
         </table>
+
+        {isModalOpen && selectedEntry && (
+  <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
+    <div className="bg-card text-foreground p-6 rounded-2xl shadow-2xl w-[350px] relative animate-in fade-in duration-200">
+      <button
+        onClick={() => setIsModalOpen(false)}
+        className="absolute top-3 right-3 text-muted-foreground hover:text-primary"
+      >
+        ✕
+      </button>
+
+      <div className="flex flex-col items-center space-y-4">
+        {/* Poster placeholder */}
+        <div className="w-40 h-56 bg-muted rounded-lg flex items-center justify-center overflow-hidden">
+          {selectedEntry.posterUrl ? (
+            <img
+              src={selectedEntry.posterUrl}
+              alt={selectedEntry.title}
+              className="w-full h-full object-cover"
+            />
+          ) : (
+            <Film className="w-12 h-12 text-muted-foreground" />
+          )}
+        </div>
+
+        <h2 className="text-xl font-semibold text-center">{selectedEntry.title}</h2>
+        <p className="text-sm text-muted-foreground text-center">
+          {selectedEntry.genre || "—"} • {selectedEntry.year_or_time} • {selectedEntry.type}
+        </p>
+
+        <div className="text-sm text-muted-foreground text-center">
+          <p><strong>Director:</strong> {selectedEntry.director}</p>
+          <p><strong>Rating:</strong> {selectedEntry.rating ? `${selectedEntry.rating}/10` : "—"}</p>
+          <p><strong>Budget:</strong> {selectedEntry.budget ? `$${Number(selectedEntry.budget).toLocaleString()}` : "—"}</p>
+        </div>
+      </div>
+    </div>
+  </div>
+)}
+
       </div>
 
       <div ref={observerTarget} className="h-4" />
