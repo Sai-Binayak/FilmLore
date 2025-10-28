@@ -74,6 +74,6 @@ router.post("/login", async (req, res) => {
   }
 });
 
-console.log("JWT Secret:", process.env.JWT_SECRET);
+// console.log("JWT Secret:", process.env.JWT_SECRET);
 
 export default router;

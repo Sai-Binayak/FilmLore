@@ -15,18 +15,14 @@ app.use(express.json());
 // Auth routes
 app.use("/auth", authRoutes);
 
-// Films — protected by JWT
+// Films routes
 app.get("/films", authenticate, async (req, res) => {
   try {
     const page = parseInt(req.query.page) || 1;
     const limit = 10;
     const skip = (page - 1) * limit;
 
-    const films = await prisma.favfilms.findMany({
-      skip,
-      take: limit,
-    });
-
+    const films = await prisma.favfilms.findMany({ skip, take: limit });
     res.json({ data: films, hasMore: films.length === limit });
   } catch (err) {
     res.status(500).json({ error: err.message });
@@ -63,5 +59,13 @@ app.delete("/films/:id", authenticate, async (req, res) => {
   }
 });
 
-const PORT = 5000;
-app.listen(PORT, () => console.log(`Server running on http://localhost:${PORT}`));
+// ✅ Export for Vercel
+export default app;
+
+// ✅ Start server locally (not executed in Vercel)
+if (!process.env.VERCEL) {
+  const PORT = process.env.PORT || 5000;
+  app.listen(PORT, () =>
+    console.log(`Server running locally on http://localhost:${PORT}`)
+  );
+}
