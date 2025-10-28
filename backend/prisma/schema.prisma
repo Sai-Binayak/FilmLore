@@ -7,16 +7,6 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-model User {
-  id        Int      @id @default(autoincrement())
-  name      String
-  email     String   @unique
-  password  String
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-}
-
-
 model favfilms {
   id           Int           @id @default(autoincrement())
   title        String        @unique(map: "title") @db.VarChar(255)
@@ -28,6 +18,15 @@ model favfilms {
   duration     String?       @db.VarChar(50)
   year_or_time String?       @db.VarChar(10)
   rating       Decimal?      @db.Decimal(3, 1)
+}
+
+model user {
+  id        Int       @id @default(autoincrement())
+  name      String    @db.VarChar(255)
+  email     String    @unique(map: "email") @db.VarChar(255)
+  password  String    @db.VarChar(255)
+  createdAt DateTime? @default(now()) @db.DateTime(0)
+  updatedAt DateTime? @default(now()) @db.DateTime(0)
 }
 
 enum favfilms_type {

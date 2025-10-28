@@ -41,15 +41,21 @@ const Index = () => {
   const loadEntries = async (pageNum: number) => {
     try {
       setIsLoading(true);
-      const result = await api.getEntries(pageNum);
+      const token = localStorage.getItem("token");
+      if (!token) {
+        toast.error("Please log in to view entries");
+        return;
+      }
+
+      const result = await api.getEntries(pageNum, 20); // no token needed; fetchWithAuth handles it
 
       if (pageNum === 1) setEntries(result.data);
       else setEntries((prev) => [...prev, ...result.data]);
 
       setHasMore(result.hasMore);
     } catch (error) {
-      toast.error("Failed to load entries");
       console.error(error);
+      toast.error("Failed to load entries. Check if you're logged in.");
     } finally {
       setIsLoading(false);
     }
@@ -97,7 +103,10 @@ const Index = () => {
     try {
       setIsSubmitting(true);
       if (selectedEntry) {
-        const updated = await api.updateEntry({ ...data, id: selectedEntry.id });
+        const updated = await api.updateEntry({
+          ...data,
+          id: selectedEntry.id,
+        });
         setEntries((prev) =>
           prev.map((e) => (e.id === updated.id ? updated : e))
         );
