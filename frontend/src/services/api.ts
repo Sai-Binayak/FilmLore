@@ -1,6 +1,7 @@
 import { Entry, CreateEntryInput, UpdateEntryInput } from "@/types/entry";
 
-const BASE_URL = "http://localhost:5000"; // backend base URL
+const BASE_URL =
+  import.meta.env.NODE_API_URL || "http://localhost:5000";
 
 function getToken() {
   return localStorage.getItem("token");

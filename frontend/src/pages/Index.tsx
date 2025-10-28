@@ -196,12 +196,12 @@ const Index = () => {
               placeholder="Search by title or director..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="px-4 py-2 border border-border rounded-lg focus:ring-2 focus:ring-yellow-500"
+              className="px-4 py-2 border border-border rounded-lg focus:ring-2 bg-purple-500 text-slate-100 focus:ring-yellow-500"
             />
             <select
               value={filterType}
               onChange={(e) => setFilterType(e.target.value)}
-              className="px-4 py-2 border border-border rounded-lg focus:ring-2 focus:ring-yellow-500"
+              className="px-4 py-2 border border-border rounded-lg focus:ring-2 bg-purple-500 focus:ring-yellow-500"
             >
               <option value="">All</option>
               <option value="Movie">Movies</option>
