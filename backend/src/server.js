@@ -1,65 +1,67 @@
-import dotenv from "dotenv";
-dotenv.config();
-
-console.log("🔍 DATABASE_URL is:", process.env.DATABASE_URL);
-
-
 import express from "express";
 import cors from "cors";
-import mysql from "mysql2";
+import dotenv from "dotenv";
+import { PrismaClient } from "@prisma/client";
+import authRoutes from "./routes/authRoutes.js";
+import { authenticate } from "./middleware/authMiddleware.js";
 
+dotenv.config();
 const app = express();
+const prisma = new PrismaClient();
+
 app.use(cors());
 app.use(express.json());
 
-// MySQL setup
-const db = mysql.createConnection({
-  host: "localhost",
-  user: "Sql_Database",
-  password: "Q1w2e3r4t5_",
-  database: "filmdb",
+// Auth routes
+app.use("/auth", authRoutes);
+
+// Films — protected by JWT
+app.get("/films", authenticate, async (req, res) => {
+  try {
+    const page = parseInt(req.query.page) || 1;
+    const limit = 10;
+    const skip = (page - 1) * limit;
+
+    const films = await prisma.favfilms.findMany({
+      skip,
+      take: limit,
+    });
+
+    res.json({ data: films, hasMore: films.length === limit });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
 });
 
-// GET all films (with pagination)
-app.get("/films", (req, res) => {
-  const page = parseInt(req.query.page) || 1;
-  const limit = 10;
-  const offset = (page - 1) * limit;
-
-  db.query("SELECT * FROM favfilms LIMIT ? OFFSET ?", [limit, offset], (err, results) => {
-    if (err) return res.status(500).json({ error: err.message });
-    res.json({ data: results, hasMore: results.length === limit });
-  });
+app.post("/films", authenticate, async (req, res) => {
+  try {
+    const newFilm = await prisma.favfilms.create({ data: req.body });
+    res.status(201).json(newFilm);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
 });
 
-// POST new film
-app.post("/films", (req, res) => {
-  const { title, type, director, budget, location, duration, year_or_time } = req.body;
-  const sql = "INSERT INTO favfilms (title, type, director, budget, location, duration, year_or_time) VALUES (?, ?, ?, ?, ?, ?, ?)";
-  db.query(sql, [title, type, director, budget, location, duration, year_or_time], (err, result) => {
-    if (err) return res.status(500).json({ error: err.message });
-    res.json({ id: result.insertId, ...req.body });
-  });
+app.put("/films/:id", authenticate, async (req, res) => {
+  try {
+    const updated = await prisma.favfilms.update({
+      where: { id: parseInt(req.params.id) },
+      data: req.body,
+    });
+    res.json(updated);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
 });
 
-// PUT (update film)
-app.put("/films/:id", (req, res) => {
-  const { id } = req.params;
-  const { title, type, director, budget, location, duration, year_or_time } = req.body;
-  const sql = "UPDATE favfilms SET title=?, type=?, director=?, budget=?, location=?, duration=?, year_or_time=? WHERE id=?";
-  db.query(sql, [title, type, director, budget, location, duration, year_or_time, id], (err) => {
-    if (err) return res.status(500).json({ error: err.message });
-    res.json({ id, ...req.body });
-  });
+app.delete("/films/:id", authenticate, async (req, res) => {
+  try {
+    await prisma.favfilms.delete({ where: { id: parseInt(req.params.id) } });
+    res.json({ message: "Film deleted" });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
 });
 
-// DELETE film
-app.delete("/films/:id", (req, res) => {
-  const { id } = req.params;
-  db.query("DELETE FROM favfilms WHERE id = ?", [id], (err) => {
-    if (err) return res.status(500).json({ error: err.message });
-    res.json({ success: true });
-  });
-});
-
-app.listen(5000, () => console.log("Server running on http://localhost:5000"));
+const PORT = 5000;
+app.listen(PORT, () => console.log(`Server running on http://localhost:${PORT}`));
