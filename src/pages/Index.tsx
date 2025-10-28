@@ -142,27 +142,35 @@ const Index = () => {
   };
 
   const handleAuthSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    try {
-      const res =
-        authMode === "login"
-          ? await api.login(email, password)
-          : await api.signup(name, email, password);
+  e.preventDefault();
+  try {
+    const res =
+      authMode === "login"
+        ? await api.login(email, password)
+        : await api.signup(name, email, password);
 
-      setUser(api.getCurrentUser());
-      setIsAuthModalOpen(false);
-      toast.success(`Welcome, ${res.user?.name || "user"}!`);
-    } catch (error) {
-      toast.error("Authentication failed");
-      console.error(error);
-    }
-  };
+    localStorage.setItem("token", res.token);
+    setUser(res.user);
+    setIsAuthModalOpen(false);
+    toast.success(`Welcome, ${res.user.name || "user"}!`);
+
+    setPage(1);
+    loadEntries(1);
+  } catch (error) {
+    toast.error("Authentication failed");
+    console.error(error);
+  }
+};
+
 
   const handleLogout = () => {
-    api.logout();
-    setUser(null);
-    toast("Logged out successfully");
-  };
+  api.logout();
+  setUser(null);
+  setEntries([]); 
+  setHasMore(false);
+  toast("Logged out successfully");
+};
+
 
   return (
     <div className="min-h-screen bg-background">
