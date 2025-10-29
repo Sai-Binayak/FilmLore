@@ -15,6 +15,7 @@ import { api } from "@/services/api";
 import { toast } from "sonner";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { Input } from "@/components/ui/input";
+import { ProfileBoard } from "@/components/ProfileBoard";
 
 const Index = () => {
   const [entries, setEntries] = useState<Entry[]>([]);
@@ -36,6 +37,8 @@ const Index = () => {
   const [name, setName] = useState("");
 
   const [user, setUser] = useState<any>(api.getCurrentUser());
+
+  const [showProfile, setShowProfile] = useState(false);
 
   // Load entries
   const loadEntries = async (pageNum: number) => {
@@ -142,35 +145,33 @@ const Index = () => {
   };
 
   const handleAuthSubmit = async (e: React.FormEvent) => {
-  e.preventDefault();
-  try {
-    const res =
-      authMode === "login"
-        ? await api.login(email, password)
-        : await api.signup(name, email, password);
+    e.preventDefault();
+    try {
+      const res =
+        authMode === "login"
+          ? await api.login(email, password)
+          : await api.signup(name, email, password);
 
-    localStorage.setItem("token", res.token);
-    setUser(res.user);
-    setIsAuthModalOpen(false);
-    toast.success(`Welcome, ${res.user.name || "user"}!`);
+      localStorage.setItem("token", res.token);
+      setUser(res.user);
+      setIsAuthModalOpen(false);
+      toast.success(`Welcome, ${res.user.name || "user"}!`);
 
-    setPage(1);
-    loadEntries(1);
-  } catch (error) {
-    toast.error("Authentication failed");
-    console.error(error);
-  }
-};
-
+      setPage(1);
+      loadEntries(1);
+    } catch (error) {
+      toast.error("Authentication failed");
+      console.error(error);
+    }
+  };
 
   const handleLogout = () => {
-  api.logout();
-  setUser(null);
-  setEntries([]); 
-  setHasMore(false);
-  toast("Logged out successfully");
-};
-
+    api.logout();
+    setUser(null);
+    setEntries([]);
+    setHasMore(false);
+    toast("Logged out successfully");
+  };
 
   return (
     <div className="min-h-screen bg-background">
@@ -188,8 +189,6 @@ const Index = () => {
               </p>
             </div>
           </div>
-
-          {/* Controls */}
           <div className="flex items-center gap-3 flex-wrap">
             <input
               type="text"
@@ -217,12 +216,21 @@ const Index = () => {
             </Button>
 
             {user ? (
-              <Button
-                onClick={handleLogout}
-                className="bg-red-500 hover:bg-red-400 text-white"
-              >
-                Logout
-              </Button>
+              <div className="flex items-center gap-2">
+                <Button
+                  onClick={() => setShowProfile(true)}
+                  className="bg-purple-500 hover:bg-purple-400 text-white rounded-full w-10 h-10 font-semibold"
+                >
+                  {user?.name?.[0]?.toUpperCase() || "U"}
+                </Button>
+
+                {/* <Button
+                  onClick={handleLogout}
+                  className="bg-red-500 hover:bg-red-400 text-white"
+                >
+                  Logout
+                </Button> */}
+              </div>
             ) : (
               <Button
                 onClick={() => setIsAuthModalOpen(true)}
@@ -246,6 +254,14 @@ const Index = () => {
           isLoading={isLoading}
         />
       </main>
+
+      {showProfile && (
+        <Dialog open={showProfile} onOpenChange={setShowProfile}>
+          <DialogContent className="max-w-3xl max-h-[90vh] overflow-y-auto">
+            <ProfileBoard user={user} onClose={() => setShowProfile(false)} />
+          </DialogContent>
+        </Dialog>
+      )}
 
       {/* Add/Edit Entry Modal */}
       <Dialog open={isFormOpen} onOpenChange={setIsFormOpen}>
