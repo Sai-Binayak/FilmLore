@@ -27,7 +27,6 @@ model user {
   password  String    @db.VarChar(255)
   createdAt DateTime? @default(now()) @db.DateTime(0)
   updatedAt DateTime? @default(now()) @db.DateTime(0)
-  favfilms  favfilms[]
 }
 
 enum favfilms_type {
