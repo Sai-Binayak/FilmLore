@@ -16,7 +16,7 @@ model favfilms {
   genre        String?       @db.VarChar(12)
   location     String?       @db.VarChar(255)
   duration     String?       @db.VarChar(50)
-  year_or_time String?       @db.VarChar(10)
+  year_or_time Int?          @db.Int
   rating       Decimal?      @db.Decimal(3, 1)
 }
 
@@ -27,6 +27,7 @@ model user {
   password  String    @db.VarChar(255)
   createdAt DateTime? @default(now()) @db.DateTime(0)
   updatedAt DateTime? @default(now()) @db.DateTime(0)
+  favfilms  favfilms[]
 }
 
 enum favfilms_type {

@@ -31,12 +31,15 @@ app.get("/films", authenticate, async (req, res) => {
 
 app.post("/films", authenticate, async (req, res) => {
   try {
+    console.log("Incoming data:", req.body); // add this
     const newFilm = await prisma.favfilms.create({ data: req.body });
     res.status(201).json(newFilm);
   } catch (err) {
+    console.error("Create error:", err);
     res.status(500).json({ error: err.message });
   }
 });
+
 
 app.put("/films/:id", authenticate, async (req, res) => {
   try {
@@ -59,10 +62,8 @@ app.delete("/films/:id", authenticate, async (req, res) => {
   }
 });
 
-// ✅ Export for Vercel
 export default app;
 
-// ✅ Start server locally (not executed in Vercel)
 if (!process.env.VERCEL) {
   const PORT = process.env.PORT || 5000;
   app.listen(PORT, () =>
